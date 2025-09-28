@@ -41,23 +41,23 @@ This project uses a trained **Random Forest** machine learning model hosted on a
 
 phishing-url-detector/
 │
-├── backend/                  # 🐍 Python ML + Flask API
+├── backend/                 
 │   ├── data/
-│   │   └── phishing_dataset.csv      # Training data
+│   │   └── phishing_dataset.csv     
 │   ├── models/
-│   │   └── phishing_model.pkl        # Trained ML model
-│   ├── train_model.py                # Script to train & save the model
-│   ├── feature_extraction.py         # Core URL feature engineering
-│   ├── app.py                        # Flask API (POST /predict)
-│   └── requirements.txt              # Python dependencies
+│   │   └── phishing_model.pkl        
+│   ├── train_model.py                
+│   ├── feature_extraction.py         
+│   ├── app.py                        
+│   └── requirements.txt              
 │
-└── extension/                # 🌐 Chrome Extension (Manifest V3)
-├── manifest.json         # Extension configuration
-├── background.js         # Service Worker (API requests)
-├── popup.html            # Extension UI
-├── popup.js              # UI logic + API calls
-├── style.css             # Popup styling
-└── icons/                # Icons (16px, 48px, 128px)
+└── extension/                
+├── manifest.json        
+├── background.js       
+├── popup.html         
+├── popup.js             
+├── style.css           
+└── icons/            
 
 ````
 
