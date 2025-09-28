@@ -1,0 +1,19 @@
+Python
+venv/
+pycache/
+*.pyc
+*.log
+
+ML Artifacts
+*.pkl
+backend/models/
+
+Datasets
+*.csv
+
+OS
+.DS_Store
+Thumbs.db
+
+dist/
+node_modules/

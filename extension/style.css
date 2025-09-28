@@ -1,0 +1,158 @@
+/* Basic Reset and Font */
+body {
+width: 300px;
+height: 380px;
+font-family: 'Inter', sans-serif;
+margin: 0;
+padding: 0;
+background-color: #f7f7f9;
+color: #333;
+}
+
+#app-container {
+padding: 20px;
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+/* Title */
+.title {
+font-size: 1.25rem;
+font-weight: 700;
+color: #2c3e50;
+text-align: center;
+margin-top: 0;
+border-bottom: 2px solid #ecf0f1;
+padding-bottom: 10px;
+}
+
+/* Status Card */
+.card {
+border-radius: 12px;
+padding: 20px;
+text-align: center;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+transition: all 0.3s ease;
+}
+
+.status-icon {
+font-size: 3rem;
+line-height: 1;
+margin-bottom: 10px;
+}
+
+.status-label {
+font-size: 1.4rem;
+font-weight: 600;
+margin: 0;
+}
+
+/* State Colors */
+.card.pending {
+background-color: #fdf6e3;
+color: #ffffff; /* Darker yellow for text */
+border: 1px solid #ffcc00;
+}
+
+.card.safe {
+background-color: #e6ffee;
+color: #27ae60;
+border: 1px solid #2ecc71;
+}
+
+.card.phishing {
+background-color: #feebe8;
+color: #c0392b;
+border: 1px solid #e74c3c;
+animation: flash-red 1s infinite alternate;
+}
+
+.card.error {
+background-color: #fbebf7;
+color: #8e44ad;
+border: 1px solid #9b59b6;
+}
+
+@keyframes flash-red {
+from { box-shadow: 0 0 10px rgba(231, 76, 60, 0.8); }
+to { box-shadow: 0 0 15px rgba(231, 76, 60, 1); }
+}
+
+/* URL Input */
+.url-info label {
+display: block;
+font-size: 0.8rem;
+font-weight: 600;
+margin-bottom: 5px;
+color: #555;
+}
+
+#current-url {
+width: 100%;
+padding: 8px 10px;
+border: 1px solid #bdc3c7;
+border-radius: 6px;
+font-size: 0.85rem;
+box-sizing: border-box;
+background-color: #ecf0f1;
+color: #34495e;
+cursor: default;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+/* Detail Box */
+.detail-box label {
+display: block;
+font-size: 0.8rem;
+font-weight: 600;
+margin-bottom: 5px;
+color: #555;
+}
+
+#message-detail {
+font-size: 0.9rem;
+padding: 10px;
+background-color: #ecf0f1;
+border-radius: 6px;
+border: 1px solid #dcdfe1;
+}
+
+/* Button */
+#refresh-button {
+background-color: #3498db;
+color: white;
+border: none;
+padding: 10px;
+border-radius: 8px;
+font-size: 1rem;
+font-weight: 600;
+cursor: pointer;
+transition: background-color 0.2s, transform 0.1s;
+}
+
+#refresh-button:hover {
+background-color: #2980b9;
+}
+
+#refresh-button:active {
+transform: scale(0.99);
+}
+
+/* Error Message */
+.error-message {
+color: #ffffff;
+font-weight: 500;
+padding: 10px;
+border: 1px solid #e74c3c;
+background-color: #fbebf7;
+border-radius: 6px;
+font-size: 0.8rem;
+text-align: center;
+}
+
+.hidden {
+display: none;
+}

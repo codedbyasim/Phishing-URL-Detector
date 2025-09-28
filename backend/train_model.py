@@ -1,104 +1,92 @@
-import os
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from joblib import dump
+import os
+import sys
+import json # New import for saving feature list
 
-# NOTE: The feature_extraction module is still required for the Flask API
-# to process NEW, un-seen URLs for prediction.
-from feature_extraction import FEATURE_NAMES
+# NOTE: Since the new user-provided dataset ('Phishing_Legitimate_full.csv') 
+# already contains pre-calculated features, we will skip the feature extraction 
+# loop and use the columns directly. The original feature_extraction.py is 
+# now only necessary for the Flask API to process new, single URLs.
 
-# Define the path for the uploaded dataset
-DATASET_PATH = "G:\\Phishing-URL-Detector\\backend\\Dataset\\Phishing_Legitimate_full.csv"
+# --- Configuration ---
+# Update this path to your uploaded filedata/Phishing_Legitimate_full.csv
+DATASET_PATH = r'G:\Phishing-URL-Detector\backend\data\Phishing_Legitimate_full.csv' 
+MODEL_DIR = 'models'
+MODEL_FILENAME = 'phishing_model.pkl'
+FEATURES_FILENAME = 'feature_metadata.json' # New file for feature names
 
-# --- Training and Saving Script ---
+# Create the model directory if it doesn't exist
+os.makedirs(os.path.join('backend', MODEL_DIR), exist_ok=True)
+MODEL_FULL_PATH = os.path.join('backend', MODEL_DIR, MODEL_FILENAME)
+FEATURES_FULL_PATH = os.path.join('backend', MODEL_DIR, FEATURES_FILENAME) # Full path for new file
 
-def train_and_save_model(model_path="backend/models/phishing_model.pkl"):
+def train_and_save_model():
     """
-    Loads data from the provided CSV, trains the classifier, and saves the model.
+    Loads pre-processed data from the CSV, trains a RandomForest model, 
+    and saves the model and the feature list to a .pkl and .json file, respectively.
     """
-    print(f"Attempting to load dataset from: {DATASET_PATH}")
-    
-    if not os.path.exists(DATASET_PATH):
-        print(f"Error: Dataset not found at {DATASET_PATH}.")
-        print("Please ensure 'Phishing_Legitimate_full.csv' is in the current directory.")
-        return
-
+    print(f"Loading data from {DATASET_PATH}...")
     try:
+        # Load the CSV file
         df = pd.read_csv(DATASET_PATH)
-        print(f"Dataset loaded successfully. Total rows: {len(df)}")
+
+        # The 'id' column and the target column should be excluded from features (X)
+        # The target variable is identified as 'CLASS_LABEL' from the CSV header.
+        
+        # Define features (X) by dropping non-feature columns
+        # We drop 'id' and the target column 'CLASS_LABEL'
+        X = df.drop(columns=['id', 'CLASS_LABEL']) 
+        
+        # Define target variable (y)
+        y = df['CLASS_LABEL']
+        
+        # Check if the feature set is empty
+        if X.empty:
+            print("ERROR: Feature matrix (X) is empty after dropping columns. Check CSV content.")
+            return
+
+    except FileNotFoundError:
+        print(f"FATAL ERROR: The file {DATASET_PATH} was not found.")
+        sys.exit(1)
+    except KeyError as e:
+        print(f"FATAL ERROR: Required column missing. Check if 'CLASS_LABEL' exists. Error: {e}")
+        sys.exit(1)
     except Exception as e:
-        print(f"Error reading CSV file: {e}")
-        return
+        print(f"An error occurred during data loading: {e}")
+        sys.exit(1)
+        
+    print(f"Dataset loaded. Total samples: {len(df)}")
+    print(f"Number of features being used: {X.shape[1]}")
 
-    # Map the required features from the CSV column names to the expected model features.
-    # We will use the features closest to the original request:
-    # - url_length (UrlLength)
-    # - has_at_symbol (AtSymbol)
-    # - has_hyphen (NumDashInHostname)
-    # - is_https (Inverse of NoHttps, where 1=NoHttps, so 1-NoHttps = 1=Https)
-    # - digit_count (NumNumericChars)
-    # - is_ip_address (IpAddress)
+    # --- Feature List Saving (NEW) ---
+    feature_list = X.columns.tolist()
+    print(f"Saving {len(feature_list)} feature names to {FEATURES_FULL_PATH}...")
+    with open(FEATURES_FULL_PATH, 'w') as f:
+        json.dump(feature_list, f, indent=4)
     
-    csv_feature_mapping = {
-        'UrlLength': 'url_length',
-        'AtSymbol': 'has_at_symbol',
-        'NumDashInHostname': 'has_hyphen',
-        'NumNumericChars': 'digit_count',
-        'IpAddress': 'is_ip_address'
-    }
-
-    # Prepare features (X)
-    X_cols = list(csv_feature_mapping.keys())
-    
-    # Add 'NoHttps' specifically for the 'is_https' feature calculation
-    X_cols.append('NoHttps') 
-    
-    X = df[X_cols].copy()
-
-    # Apply transformations needed to match feature definition:
-    # 1. 'is_https': The 'NoHttps' column is 1 if it's HTTP, 0 if it's HTTPS. 
-    #    We need 'is_https' where 1=HTTPS, so we calculate 1 - NoHttps.
-    X['is_https'] = 1 - X['NoHttps']
-    X.drop('NoHttps', axis=1, inplace=True)
-    
-    # Rename columns to match the EXPECTED FEATURE_NAMES list order (defined in feature_extraction.py)
-    X.rename(columns=csv_feature_mapping, inplace=True)
-    
-    # Reorder columns to ensure consistency with the feature extraction order
-    X = X[FEATURE_NAMES]
-    
-    # Prepare target variable (y)
-    # The target column is CLASS_LABEL (0: legitimate, 1: phishing)
-    y = df['CLASS_LABEL']
-    
-    # Check for consistency
-    print(f"Features used for training: {list(X.columns)}")
-    
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
-    
-    print(f"Total training samples: {len(X_train)}")
-    print(f"Total testing samples: {len(X_test)}")
-    
-    # Initialize and train the classifier
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    # --- Training ---
     print("Training RandomForestClassifier...")
-    model.fit(X_train, y_train)
     
-    # Evaluate the model
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    # Initialize and train the model
+    model = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Evaluate the model (Optional, but good practice)
     accuracy = model.score(X_test, y_test)
     print(f"Model trained successfully. Test Accuracy: {accuracy:.4f}")
-    
-    # Ensure the models directory exists
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    
-    # Save the trained model using joblib
-    dump(model, model_path)
-    print(f"Trained model successfully saved to: {model_path}")
 
-if __name__ == "__main__":
+    # --- Save Model ---
+    print(f"Saving model to {MODEL_FULL_PATH}...")
+    dump(model, MODEL_FULL_PATH)
+    print("Model saved successfully. You can now run 'python backend/app.py'")
+
+if __name__ == '__main__':
     train_and_save_model()

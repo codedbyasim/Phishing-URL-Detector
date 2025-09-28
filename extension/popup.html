@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phishing Detector</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app-container">
+    <h1 class="title">URL Safety Check</h1>
+
+    <!-- Status Card -->
+    <div id="status-container" class="card pending">
+      <div class="status-icon">
+        <span id="icon-indicator">...</span>
+      </div>
+      <p id="status-text" class="status-label">Awaiting check...</p>
+      <p id="proba-text" class="status-probability hidden">Probability: --%</p>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="spinner hidden"></div>
+
+    <!-- Detail Box -->
+    <div class="detail-box">
+      <label>Detection Detail:</label>
+      <p id="reason-text">Click the extension icon to start the check.</p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <button id="refresh-button">Check Again</button>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="error-message hidden"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
