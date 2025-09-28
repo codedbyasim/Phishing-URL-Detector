@@ -1,4 +1,4 @@
-# 🎣 Phishing URL Detector: Full-Stack ML Security
+# Phishing URL Detector: Full-Stack ML Security
 
 A complete, full-stack solution to detect potentially malicious phishing URLs in real time.  
 This project uses a trained **Random Forest** machine learning model hosted on a **Flask API**, along with a lightweight **Chrome Extension** for instant security feedback.
