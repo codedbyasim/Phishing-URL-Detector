@@ -1,208 +1,154 @@
-# Phishing URL Detector
+# 🎣 Phishing URL Detector: Full-Stack ML Security
 
-![Project Icon](extension/icons/icon128.png)
-
-> A full-stack demo that detects potentially malicious phishing URLs in real time. It uses a RandomForest model served by a Flask API and a lightweight Chrome extension that checks the current tab URL.
-
----
-
-## 🔎 What this project does
-
-This repo contains a complete end-to-end demo for detecting phishing URLs. The user installs and runs the backend (Python + Flask) locally. The Chrome extension calls the backend to evaluate the currently open tab URL and shows a clear safe / suspicious status in the popup.
-
-This project is ideal for learning feature engineering for URLs, building a small ML pipeline, and connecting a browser extension to a Python API.
+A complete, full-stack solution to detect potentially malicious phishing URLs in real time.  
+This project uses a trained **Random Forest** machine learning model hosted on a **Flask API**, along with a lightweight **Chrome Extension** for instant security feedback.
 
 ---
 
-## Features
+## ✨ Features
 
-* Fast URL feature extraction (length, tokens, dot counts, IP-in-host tests, suspicious words, etc.)
-* RandomForest classifier trained on a demo dataset
-* Flask API with a single `/predict` endpoint (POST)
-* Chrome Extension (Manifest V3) that checks the active tab URL in real time
-* Clear popup UI with safety status and explanation
+- ✅ **Real-time Analysis**  
+  Instantly checks the current tab’s URL when the user clicks the extension icon.
+
+- 🧠 **Machine Learning Backend**  
+  Uses a trained **RandomForest** classifier to analyze URL features (length, subdomains, symbols, etc.).
+
+- 🧩 **Feature Engineering**  
+  Core feature extraction handled via `feature_extraction.py`.
+
+- 🔐 **Cross-Origin API Support**  
+  Secure communication between the Chrome Extension and Flask backend.
+
+- 💡 **Lightweight Frontend**  
+  Simple, non-intrusive Chrome Extension built with **Manifest V3**.
 
 ---
 
-## Repo structure
+## 🛠️ Technology Stack
+
+| Component        | Technology                        | Purpose                                      |
+|------------------|-----------------------------------|----------------------------------------------|
+| Machine Learning | Python, Scikit-learn (RandomForest) | Training, feature extraction, predictions    |
+| Backend API      | Flask                             | REST API serving model predictions           |
+| Frontend         | Chrome Extension (Manifest V3)    | UI + background requests                     |
+| Model Storage    | Pickle (.pkl)                     | Saving the trained ML model                  |
+
+---
+
+## 📂 Project Structure
 
 ```
+
 phishing-url-detector/
 │
-├── backend/
+├── backend/                  # 🐍 Python ML + Flask API
 │   ├── data/
-│   │   └── phishing_dataset.csv
+│   │   └── phishing_dataset.csv      # Training data
 │   ├── models/
-│   │   └── phishing_model.pkl
-│   ├── train_model.py
-│   ├── feature_extraction.py
-│   ├── app.py
-│   ├── test_api.py
-│   └── requirements.txt
+│   │   └── phishing_model.pkl        # Trained ML model
+│   ├── train_model.py                # Script to train & save the model
+│   ├── feature_extraction.py         # Core URL feature engineering
+│   ├── app.py                        # Flask API (POST /predict)
+│   └── requirements.txt              # Python dependencies
 │
-├── extension/
-│   ├── manifest.json
-│   ├── background.js
-│   ├── popup.html
-│   ├── popup.js
-│   ├── style.css
-│   └── icons/
-│       ├── icon16.png
-│       ├── icon48.png
-│       └── icon128.png
-│
-├── .gitignore
-├── README.md
-└── LICENSE
-```
+└── extension/                # 🌐 Chrome Extension (Manifest V3)
+├── manifest.json         # Extension configuration
+├── background.js         # Service Worker (API requests)
+├── popup.html            # Extension UI
+├── popup.js              # UI logic + API calls
+├── style.css             # Popup styling
+└── icons/                # Icons (16px, 48px, 128px)
+
+````
 
 ---
 
-## Quick start
+## 🚀 Setup & Installation
 
-### 1) Backend (Python + Flask)
-
-1. Open a terminal and go to the backend folder:
+### ✅ 1. Backend (Flask + ML Model)
 
 ```bash
 cd backend
-```
+````
 
-2. Create and activate a virtual environment:
+**Create a virtual environment (recommended):**
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 ```
 
-3. Install dependencies:
+**Install dependencies:**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Train the model (this reads `data/phishing_dataset.csv`, extracts features, trains RandomForest, and saves the model to `models/phishing_model.pkl`):
+**Train the model:**
 
 ```bash
 python train_model.py
 ```
 
-5. Run the Flask API (default: [http://127.0.0.1:5000](http://127.0.0.1:5000)):
+This will:
+
+* Load the dataset
+* Extract features
+* Train the RandomForest model
+* Save it to `backend/models/phishing_model.pkl`
+
+**Run the API:**
 
 ```bash
 python app.py
 ```
 
-Keep the API running while you use the extension.
+You should see:
 
----
-
-### 2) Chrome Extension (Manifest V3)
-
-1. Create three placeholder icons and place them at `extension/icons/icon16.png`, `icon48.png`, and `icon128.png`.
-
-2. Open Chrome or Edge and go to `chrome://extensions` or `edge://extensions`.
-
-3. Enable Developer mode.
-
-4. Click **Load unpacked** and select the `extension/` folder.
-
-5. The extension icon should appear in the toolbar. Visit any site and click the icon. The popup will show the prediction returned by your backend.
-
----
-
-## API specification
-
-**POST /predict**
-
-Request JSON
-
-```json
-{
-  "url": "https://example.com/path?query=1"
-}
 ```
-
-Response JSON
-
-```json
-{
-  "prediction": "malicious",      // or "benign"
-  "probability": 0.93,            // model confidence
-  "explanation": {
-    "feature_scores": {"url_length": 1, "num_dots": 0, ...},
-    "reasons": ["suspicious keyword: login", "long hostname"]
-  }
-}
-```
-
-A simple `test_api.py` script is included to exercise the endpoint.
-
----
-
-## How the ML side works (short)
-
-* `feature_extraction.py` contains functions that transform a raw URL into numeric features the model understands. Examples:
-
-  * URL length and number of path segments
-  * Hostname token counts and presence of IP addresses
-  * Number of dots and hyphens
-  * Presence of suspicious words like `login`, `secure`, `verify`, etc.
-  * Ratio of digits/letters
-
-* `train_model.py` loads `data/phishing_dataset.csv`, applies the feature extractor, trains a `RandomForestClassifier`, evaluates it on a holdout set, prints key metrics, and saves the trained model to `models/phishing_model.pkl`.
-
-* `app.py` loads the saved model at startup and exposes `/predict` to receive a URL, run the extractor, and return the prediction and a compact explanation.
-
----
-
-## Tips to improve accuracy
-
-* Use more labeled data and balance classes.
-* Try feature selection or using more advanced models like XGBoost or LightGBM.
-* Add heuristic signals such as WHOIS age, SSL certificate checks, or domain registration country.
-* Collect real-world false positives and false negatives and add them to the training set.
-
----
-
-## Security and privacy notes
-
-* This demo sends URLs from your browser to a local API. Do not run this against private or internal URLs you cannot share. If you deploy remotely, use HTTPS and authentication.
-* The model is for educational/demo purposes only. Do not rely on it as your sole phishing defense.
-
----
-
-## Development notes
-
-* If you change features, re-run `python train_model.py` to re-create `models/phishing_model.pkl`.
-* To add more UI details to the extension, update `popup.html`, `popup.js`, and `style.css`. Keep the extension logic in `background.js` minimal; let `popup.js` handle rendering.
-
----
-
-## Example curl (quick test)
-
-```bash
-curl -X POST http://127.0.0.1:5000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"url":"http://192.168.1.2/verify-login"}'
+Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
 ```
 
 ---
 
-## Contributing
+### ✅ 2. Chrome Extension Setup
 
-If you want to contribute:
+**Add icons**
+Make sure these files exist under `extension/icons/`:
 
-1. Fork the repo
-2. Create a feature branch
-3. Add tests and documentation
-4. Open a pull request describing the change
+* `icon16.png`
+* `icon48.png`
+* `icon128.png`
+
+**Load in Chrome/Edge:**
+
+1. Open `chrome://extensions` or `edge://extensions`
+2. Enable **Developer mode**
+3. Click **Load unpacked**
+4. Select the `extension/` folder
+
+The extension icon should now appear in your browser toolbar.
 
 ---
 
-## License
+## 💡 Usage
 
-This project is open source. See the `LICENSE` file for details.
+1. Start the Flask API:
 
-* Produce a polished popup design and matching icons.
-* Create a `deploy/` folder with a Dockerfile for the backend.
+   ```bash
+   python app.py
+   ```
+
+2. Open any website (e.g., `https://google.com` or a test phishing URL).
+
+3. Click the **Phishing URL Detector** extension icon.
+
+4. The popup will display the prediction based on your local ML model.
+
+| Verdict  | Indicator | Meaning                                              |
+| -------- | --------- | ---------------------------------------------------- |
+| SAFE     | ✅ Green   | URL is predicted to be legitimate                    |
+| PHISHING | ⚠️ Red    | URL shows characteristics commonly found in phishing |
