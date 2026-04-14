@@ -5,7 +5,7 @@ This project uses a trained **Random Forest** machine learning model hosted on a
 
 ---
 
-## ✨ Features
+##  Features
 
 - ✅ **Real-time Analysis**  
   Instantly checks the current tab’s URL when the user clicks the extension icon.
